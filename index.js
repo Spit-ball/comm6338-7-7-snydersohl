@@ -65,4 +65,40 @@ let timerEl
 let currentQuestion
 let finalScore
 
+function beginQuiz() {
+    score = 0
+    currentQuestion = 0
+    quiz.innerHTML = ''
+
+    let finalScore = localStorage.getItem('previous-score')
+    if (finalScore) {
+        finalScoreEl.textContent = 'Previous Score: ' + finalScore
+        quiz.appendChild(finalScoreEl)
+    }
+
+    startButton.id = 'start-quiz'
+    startButton.textContent = "Start Quiz"
+    quiz.appendChild(startButton)
+}
+
+function startTimer() {
+    timerEl = setInterval(function () {
+        timeRemaining--
+        if (timeRemaining > 0) {
+            timer.textContent = timeRemaining
+        } else {
+            clearInterval(timerEl)
+            currentQuestion++
+            if (currentQuestion < questionsArr.length) {
+                getQuestion()
+            } else {
+                endQuiz()
+            }
+        }
+    }, 1000)
+}
+
+
+
+
 
