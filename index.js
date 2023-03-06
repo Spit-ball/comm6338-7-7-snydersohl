@@ -53,52 +53,94 @@ var questionsArr = [
 
 //Accessing/Creating Dom Elements
 
-var finalScoreEl = document.createElement('p')
-var startButton = document.createElement('button')
-var quiz = document.getElementById('quiz')
-var timer = document.createElement('p')
-var question = document.createElement('p')
+var finalScoreEl = document.createElement('p');
+var startButton = document.createElement('button');
+var quiz = document.getElementById('quiz');
+var timer = document.createElement('p');
+var question = document.createElement('p');
 
 
 //Initiating some variables for later use.
-let timerEl
-let currentQuestion
+let timerDisplay
+let displayedQuestion
 let finalScore
 
-function beginQuiz() {
-    score = 0
-    currentQuestion = 0
-    quiz.innerHTML = ''
 
-    let finalScore = localStorage.getItem('previous-score')
+function beginQuiz() {
+    score = 0;
+    displayedQuestion = 0;
+    quiz.innerHTML = '';
+    let finalScore = localStorage.getItem('previous-score');
     if (finalScore) {
-        finalScoreEl.textContent = 'Previous Score: ' + finalScore
-        quiz.appendChild(finalScoreEl)
+        finalScoreEl.textContent = 'Previous Score: ' + finalScore;
+        quiz.appendChild(finalScoreEl);
     }
 
-    startButton.id = 'start-quiz'
-    startButton.textContent = "Start Quiz"
-    quiz.appendChild(startButton)
+    startButton.id = 'start-quiz';
+    startButton.textContent = "Start Quiz";
+    quiz.appendChild(startButton);
 }
-
+// simple 30s timer.
 function startTimer() {
-    timerEl = setInterval(function () {
-        timeRemaining--
+    timerDisplay = setInterval(function () {
+        timeRemaining--;
         if (timeRemaining > 0) {
-            timer.textContent = timeRemaining
+            timer.textContent = timeRemaining;
         } else {
-            clearInterval(timerEl)
-            currentQuestion++
-            if (currentQuestion < questionsArr.length) {
-                getQuestion()
+            clearInterval(timerDisplay);
+            displayedQuestion++;
+            if (displayedQuestion < questionsArr.length) {
+                displayQuestion();
             } else {
-                endQuiz()
+                quitQuiz();
             }
         }
     }, 1000)
 }
 
+// Displaying the question to the user with timer. Appending divs to HTML, and creating option buttons.
+function displayQuestion() {
+    timeRemaining = 30;
+    quiz.innerHTML = "";
+    var questionAsked = questionsArr[displayedQuestion];
+    question.textContent = questionAsked.question;
+    quiz.appendChild(question);
+    var options = document.createElement('div');
+    options.id = 'options';
+    quiz.appendChild(options);
+    questionAsked.options.forEach(function (option) {
+        var choiceButton = document.createElement('button');
+        choiceButton.textContent = option;
+        options.appendChild(choiceButton);
+    })
+    timer.textContent = timeRemaining;
+    quiz.appendChild(timer);
+    startTimer();
+}
 
+// event listener for ids applied and button click. Clears timer when question index is raised.
+quiz.addEventListener('click', function (e) {
+    if (e.target.id === 'start-quiz') {
+        displayQuestion();
+    } else if (e.target.parentElement.id === 'options' && e.target.tagName === 'BUTTON') {
+        if (e.target.textContent === questionsArr[displayedQuestion].answer) {
+            score++
+        }
+        clearInterval(timerDisplay);
+        displayedQuestion++;
+        if (displayedQuestion < questionsArr.length) {
+            displayQuestion();
+        } else {
+            quitQuiz();
+        }
+    }
+})
 
+// end quiz and calc percentage same as last assignment, trigger begin quiz func.
+function quitQuiz() {
+    var percentage = Math.round(score / questionsArr.length * 100) + '%'
+    localStorage.setItem('previous-score', percentage)
+    beginQuiz()
+}
 
-
+beginQuiz()
